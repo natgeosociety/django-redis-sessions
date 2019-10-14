@@ -1,3 +1,4 @@
+import logging
 import redis
 
 try:
@@ -6,6 +7,9 @@ except ImportError:  # Python 3.*
     from django.utils.encoding import force_text as force_unicode
 from django.contrib.sessions.backends.base import SessionBase, CreateError
 from redis_sessions import settings
+
+
+logger = logging.getLogger(__name__)
 
 
 class RedisServer():
@@ -107,11 +111,11 @@ class SessionStore(SessionBase):
 
     def load(self):
         try:
-            session_data = self.server.get(
-                self.get_real_stored_key(self._get_or_create_session_key())
-            )
+            sess_key = self.get_real_stored_key(self._get_or_create_session_key())
+            session_data = self.server.get(sess_key)
             return self.decode(force_unicode(session_data))
-        except:
+        except Exception as e:
+            logger.exception("Failed to get session key %s" % sess_key)
             self._session_key = None
             return {}
 
@@ -124,7 +128,8 @@ class SessionStore(SessionBase):
 
             try:
                 self.save(must_create=True)
-            except CreateError:
+            except CreateError as e:
+                logger.exception("Could not save session key %s" % self._session_key)
                 # Key wasn't unique. Try again.
                 continue
             self.modified = True
