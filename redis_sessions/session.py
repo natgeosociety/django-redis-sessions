@@ -125,6 +125,7 @@ class SessionStore(SessionBase):
     def create(self):
         while True:
             self._session_key = self._get_new_session_key()
+            logger.info("Creating new session key %s" % self._session_key)
 
             try:
                 self.save(must_create=True)
@@ -163,9 +164,10 @@ class SessionStore(SessionBase):
                 return
             session_key = self.session_key
         try:
-            self.server.delete(self.get_real_stored_key(session_key))
+            real_sess_key = self.get_real_stored_key(session_key)
+            self.server.delete(real_sess_key)
         except:
-            pass
+            logger.exception("Failed to delete session key %s" % real_sess_key)
 
     @classmethod
     def clear_expired(cls):
