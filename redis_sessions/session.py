@@ -1,9 +1,9 @@
 import redis
 
 try:
-    from django.utils.encoding import force_unicode
+    from django.utils.encoding import force_text
 except ImportError:  # Python 3.*
-    from django.utils.encoding import force_text as force_unicode
+    from django.utils.encoding import force_text as force_text
 from django.contrib.sessions.backends.base import SessionBase, CreateError
 from redis_sessions import settings
 
@@ -110,7 +110,7 @@ class SessionStore(SessionBase):
             session_data = self.server.get(
                 self.get_real_stored_key(self._get_or_create_session_key())
             )
-            return self.decode(force_unicode(session_data))
+            return self.decode(force_text(session_data))
         except:
             self._session_key = None
             return {}

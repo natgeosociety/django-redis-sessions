@@ -10,7 +10,7 @@ from django.http import HttpResponse
 from django.views import View
 
 
-import settings as app_settings
+from . import settings as app_settings
 
 class RedisSessionsView(View):
     def get(self, request):
